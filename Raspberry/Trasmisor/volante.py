@@ -7,7 +7,7 @@ import json
 import time
 
 #####################WIFICONF#######################
-UDP_IP = "192.168.0.194"
+UDP_IP = "192.168.0.107"
 UDP_PORT = 5005
 
 #globalvars
