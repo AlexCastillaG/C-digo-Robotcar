@@ -15,7 +15,17 @@ velocity = 50; #max velocity
 turn_angle = 90; #max turn angle
 cal_angle = 90;
 # DEFS
+def angle_to_pwm(angle):
+    if angle > 180 or angle < 0:
+        return False
 
+    start = 1000
+    end = 2000
+    ratio = (end - start)/180  # Calcul ratio from angle to percent
+
+    angle_as_pwm = angle * ratio
+
+    return start + angle_as_pwm
 
 def get_speed(input_fpedal, input_brake, forward, backward): #get speed adapted to pwm signal with the pedal inputs
 #booleans select the direcction
@@ -34,7 +44,7 @@ def get_speed(input_fpedal, input_brake, forward, backward): #get speed adapted 
     return speed
 
 
-def get_angle(input_wheel):#get the angle adapted to pwm signal depending on the wheel input
+def get_angle_pwm(input_wheel):#get the angle adapted to pwm signal depending on the wheel input
 
     angle = 90
 
@@ -44,7 +54,9 @@ def get_angle(input_wheel):#get the angle adapted to pwm signal depending on the
     elif input_wheel >= 0:
         angle = cal_angle+turn_angle*input_wheel
 
-    return angle
+    pwm_signal = angle_to_pwm(angle)
+
+    return pwm_signal
 
 
 
@@ -130,9 +142,9 @@ class PS4Controller(object):
                     # pprint.pprint(self.button_data.get(5))
                     #pprint.pprint(self.button_data)
                     current_speed = get_speed(self.axis_data.get(4),self.axis_data.get(3),self.button_data.get(5),self.button_data.get(4))
-                    current_angle = get_angle(self.axis_data.get(0))
-                    pprint.pprint("Speed: "+str(current_speed)+ " Angle: "+str(current_angle))
-                    send(current_speed,current_angle)
+                    current_pwm_angle = get_angle_pwm(self.axis_data.get(0))
+                    pprint.pprint("Speed: "+str(current_speed)+ " Angle: "+str(current_pwm_angle))
+                    send(current_speed,current_pwm_angle)
 
 if __name__ == "__main__":
     ps4 = PS4Controller()

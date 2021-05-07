@@ -22,17 +22,7 @@ frequence = 50
 pi = pigpio.pi() # Connect to local Pi.
 
 #defs
-def angle_to_pwm(angle):
-    if angle > 180 or angle < 0:
-        return False
 
-    start = 1000
-    end = 2000
-    ratio = (end - start)/180  # Calcul ratio from angle to percent
-
-    angle_as_pwm = angle * ratio
-
-    return start + angle_as_pwm
 
 def initialization():
 
