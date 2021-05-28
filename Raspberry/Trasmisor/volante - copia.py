@@ -11,7 +11,7 @@ UDP_IP = "192.168.0.194"
 UDP_PORT = 5005
 
 #globalvars
-velocity = 50; #max velocity
+velocity = 1500; #max velocity
 turn_angle = 90; #max turn angle
 cal_angle = 90;
 # DEFS
@@ -27,21 +27,7 @@ def angle_to_pwm(angle):
 
     return start + angle_as_pwm
 
-def get_speed(input_fpedal, input_brake, forward, backward): #get speed adapted to pwm signal with the pedal inputs
-#booleans select the direcction
-    brake = (input_brake+1)/2
-    speed = (input_fpedal+1)/2
-    if forward:
-        speed = 1500+velocity*speed-velocity*brake
-        if speed<1500:
-            speed=1500
-    elif backward:
-        speed = 1500-velocity*speed+velocity*brake
-        if speed>1500:
-            speed=1500
-    else:
-        speed = 1500
-    return speed
+
 
 
 def get_angle_pwm(input_wheel):#get the angle adapted to pwm signal depending on the wheel input
@@ -116,13 +102,9 @@ class PS4Controller(object):
                             exit()
                         global velocity
                         if event.button == 0:
-                            if velocity >= 500:
-                                velocity=450
                             velocity=velocity+10
                         if event.button == 1:
                             velocity=velocity-10
-                            if velocity <= 0:
-                                velocity=50
                         else:
                             if event.button == 4:
                                 self.button_data.update({5: False})
@@ -141,7 +123,7 @@ class PS4Controller(object):
                     #     4),self.axis_data.get(3) ,self.button_data.get(5),self.button_data.get(4)))
                     # pprint.pprint(self.button_data.get(5))
                     #pprint.pprint(self.button_data)
-                    current_speed = get_speed(self.axis_data.get(4),self.axis_data.get(3),self.button_data.get(5),self.button_data.get(4))
+                    current_speed = velocity
                     current_pwm_angle = get_angle_pwm(self.axis_data.get(0))
                     pprint.pprint("Speed: "+str(current_speed)+ " Angle: "+str(current_pwm_angle))
                     send(current_speed,current_pwm_angle)
