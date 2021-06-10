@@ -9,14 +9,38 @@ import threading
 
 
 #####################WIFICONF#######################
-UDP_IP = "192.168.0.107"
+UDP_IP = "192.168.0.194"
 UDP_PORT = 5005
 
 #globalvars
 cal_angle = 90;
-
+turn_angle = 90;
 # DEFS
+def angle_to_pwm(angle):
+    if angle > 180 or angle < 0:
+        return False
 
+    start = 1000
+    end = 2000
+    ratio = (end - start)/180  # Calcul ratio from angle to percent
+
+    angle_as_pwm = angle * ratio
+
+    return start + angle_as_pwm
+
+def get_angle_pwm(input_wheel):#get the angle adapted to pwm signal depending on the wheel input
+
+    angle = 90
+
+    if input_wheel < 0:
+        input_wheel = -input_wheel
+        angle = cal_angle-turn_angle*input_wheel
+    elif input_wheel >= 0:
+        angle = cal_angle+turn_angle*input_wheel
+
+    pwm_signal = angle_to_pwm(angle)
+
+    return pwm_signal
 class ThreadClass(threading.Thread):
     
   def run(self):
@@ -26,8 +50,7 @@ class ThreadClass(threading.Thread):
 
 def send(speed, angle): #send the information to a client
 
-    data = json.dumps("$ZR,"+str(angle)+","+str(speed)+"\n\r" )
-    #pprint.pprint("$ZR,"+str(angle)+","+str(speed)+"\n\r" )
+    data = json.dumps({"speed": speed, "angle": angle})
     MESSAGE = data.encode()
 
     sock = socket.socket(socket.AF_INET,  # Internet
@@ -49,7 +72,7 @@ class PS4Controller(object):
 
         pygame.init()
         pygame.joystick.init()
-        self.controller = pygame.joystick.Joystick(1)
+        self.controller = pygame.joystick.Joystick(0)
         self.controller.init()
         pprint.pprint(pygame.joystick.get_count)
 
@@ -78,45 +101,30 @@ class PS4Controller(object):
                     elif event.type == pygame.JOYBUTTONUP:
                         self.button_data[event.button] = not self.button_data[event.button]
                         if event.button == 2:
-                            send(1500,90)
+                            send(1500,1500)
                             exit()
-                        global velocity
-                        if event.button == 0:
-                            if velocity >= 500:
-                                velocity=450
-                            velocity=velocity+10
-                        if event.button == 1:
-                            velocity=velocity-10
-                            if velocity <= 0:
-                                velocity=50
-                        else:
-                            if event.button == 4:
-                                self.button_data.update({5: False})
-                            elif event.button == 5:
-                                self.button_data.update({4: False})
-                            #pprint.pprint("4: {}".format(self.button_data.get(4)))
-                            #pprint.pprint("5: {}".format(self.button_data.get(5)))
+                        
                     elif event.type == pygame.JOYHATMOTION:
                         self.hat_data[event.hat] = event.value
 
                     # Insert your code on what you would like to happen for each event here!
                     # In the current setup, I have the state simply printing out to the screen.
 
-                    pprint.pprint(self.axis_data)
+                    pprint.pprint(self.axis_data.get(1))
                     #pprint.pprint(get_speed(self.axis_data.get(
                     #     4),self.axis_data.get(3) ,self.button_data.get(5),self.button_data.get(4)))
                     # pprint.pprint(self.button_data.get(5))
                     #pprint.pprint(self.button_data)
-                    current_speed = int(self.axis_data.get(0)*100)
-                    current_pwm_angle = int(self.axis_data.get(0)*100)
+                   # current_speed = int(get_angle_pwm(self.axis_data.get(1)))
+                    current_pwm_angle = int(get_angle_pwm(self.axis_data.get(0)))
                    # pprint.pprint("Speed: "+str(current_speed)+ " Angle: "+str(current_pwm_angle))
-                    send(current_speed,current_pwm_angle)
+                   # send(current_speed,current_pwm_angle)
 
 
 
 if __name__ == "__main__":
 
-    PS4 = ThreadClass()
-    PS4.start()
-
+    ps4 = PS4Controller()
+    ps4.init()
+    ps4.listen()
     
