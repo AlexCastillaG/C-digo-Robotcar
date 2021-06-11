@@ -16,6 +16,9 @@ UDP_PORT = 5005
 cal_angle = 90;
 turn_angle = 90;
 # DEFS
+ 
+
+
 def angle_to_pwm(angle):
     if angle > 180 or angle < 0:
         return False
@@ -41,12 +44,19 @@ def get_angle_pwm(input_wheel):#get the angle adapted to pwm signal depending on
     pwm_signal = angle_to_pwm(angle)
 
     return pwm_signal
-class ThreadClass(threading.Thread):
+class ThreadClass_PS4(threading.Thread):
     
   def run(self):
     ps4 = PS4Controller()
     ps4.init()
     ps4.listen()
+
+class ThreadClass_Throttle(threading.Thread):
+    
+  def run(self):
+    throttle = throttleController()
+    throttle.init()
+    throttle.listen()
 
 def send(speed, angle): #send the information to a client
 
@@ -66,65 +76,106 @@ class PS4Controller(object):
     axis_data = {0: 0.0,}#initilizate the axis you will use in this dictionary
     button_data = None
     hat_data = None
-
-    def init(self):
+    contador=0
+    
+    
+    def init(PS4Controller):
         """Initialize the joystick components"""
-
+        
         pygame.init()
         pygame.joystick.init()
-        self.controller = pygame.joystick.Joystick(0)
-        self.controller.init()
+        PS4Controller.controller = pygame.joystick.Joystick(1)
+        PS4Controller.controller.init()
         pprint.pprint(pygame.joystick.get_count)
 
 
 
-    def listen(self):
+    def listen(PS4Controller):
         """Listen for events to happen"""
 
-        if not self.axis_data:
-            self.axis_data = {0: 0.0}#initilizate the axis you will use in this dictionary
+        if not PS4Controller.axis_data:
+            PS4Controller.axis_data = {0: 0.0}#initilizate the axis you will use in this dictionary
 
-        if not self.button_data:
-            self.button_data = {}
-            for i in range(self.controller.get_numbuttons()):
-                self.button_data[i] = False
+        if not PS4Controller.button_data:
+            PS4Controller.button_data = {}
+            for i in range(PS4Controller.controller.get_numbuttons()):
+                PS4Controller.button_data[i] = False
 
-        if not self.hat_data:
-            self.hat_data = {}
-            for i in range(self.controller.get_numhats()):
-                self.hat_data[i] = (0, 0)
 
         while True:
                 for event in pygame.event.get():
                     if event.type == pygame.JOYAXISMOTION:
-                        self.axis_data[event.axis] = round(event.value, 2)
+                        PS4Controller.axis_data[event.axis] = round(event.value, 2)
                     elif event.type == pygame.JOYBUTTONUP:
-                        self.button_data[event.button] = not self.button_data[event.button]
+                        PS4Controller.button_data[event.button] = not PS4Controller.button_data[event.button]
                         if event.button == 2:
                             send(1500,1500)
                             exit()
                         
-                    elif event.type == pygame.JOYHATMOTION:
-                        self.hat_data[event.hat] = event.value
+
 
                     # Insert your code on what you would like to happen for each event here!
                     # In the current setup, I have the state simply printing out to the screen.
-
-                    pprint.pprint(self.axis_data.get(1))
+                
+                    PS4Controller.contador=PS4Controller.contador+10
+                    print(PS4Controller.contador)
+                   # pprint.pprint(self.axis_data.get(1))
                     #pprint.pprint(get_speed(self.axis_data.get(
                     #     4),self.axis_data.get(3) ,self.button_data.get(5),self.button_data.get(4)))
                     # pprint.pprint(self.button_data.get(5))
                     #pprint.pprint(self.button_data)
                    # current_speed = int(get_angle_pwm(self.axis_data.get(1)))
-                    current_pwm_angle = int(get_angle_pwm(self.axis_data.get(0)))
+                    current_pwm_angle = int(get_angle_pwm(PS4Controller.axis_data.get(0)))
+                    #print("angle:" + str(current_pwm_angle))
                    # pprint.pprint("Speed: "+str(current_speed)+ " Angle: "+str(current_pwm_angle))
                    # send(current_speed,current_pwm_angle)
 
+class throttleController(object):
+    """Class representing the PS4 controller. Pretty straightforward functionality."""
+    contador=0
+    controller = None
+    axis_data_2 = {0: 0.0,}#initilizate the axis you will use in this dictionary
+    button_data = None
+    hat_data = None
 
+    def init(throttleController):
+        """Initialize the joystick components"""
+        
+        pygame.init()
+        pygame.joystick.init()
+        throttleController.controller = pygame.joystick.Joystick(0)
+        throttleController.controller.init()
+        pprint.pprint(pygame.joystick.get_count)
+
+
+
+    def listen(throttleController):
+        """Listen for events to happen"""
+
+        if not throttleController.axis_data_2:
+            throttleController.axis_data_2 = {0: 0.0}#initilizate the axis you will use in this dictionary
+
+
+        while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.JOYAXISMOTION:
+                        throttleController.axis_data_2[event.axis] = round(event.value, 2)
+
+                    # Insert your code on what you would like to happen for each event here!
+                    # In the current setup, I have the state simply printing out to the screen.
+
+                    #pprint.pprint(self.axis_data_2)
+
+                    current_pwm_angle = int(get_angle_pwm(throttleController.axis_data_2.get(0)))
+                    #print("speed: " + str(current_pwm_angle))
+
+                
+                throttleController.contador=throttleController.contador+50
+               # print("____"+str(throttleController.contador))
 
 if __name__ == "__main__":
 
-    ps4 = PS4Controller()
-    ps4.init()
-    ps4.listen()
-    
+    hilo_ps4=ThreadClass_PS4()
+    hilo_ps4.start()
+    hilo_Throttle=ThreadClass_Throttle()
+    hilo_Throttle.start()
