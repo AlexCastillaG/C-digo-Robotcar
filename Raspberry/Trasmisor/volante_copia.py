@@ -7,7 +7,7 @@ import json
 import time
 
 #####################WIFICONF#######################
-UDP_IP = "192.168.0.194"
+UDP_IP = "192.168.0.118"
 UDP_PORT = 5005
 
 #globalvars
@@ -73,9 +73,9 @@ class PS4Controller(object):
         pygame.init()
         pygame.joystick.init()
         self.controller = pygame.joystick.Joystick(0)
-        self.controller2 = pygame.joystick.Joystick(1)
+        
         self.controller.init()
-        self.controller2.init()
+        
         
     def init2(self2):
         """Initialize the joystick components"""
@@ -86,11 +86,14 @@ class PS4Controller(object):
         self2.controller.init()
 
 
-    def listen(self):
+    def listen(self,self2):
         """Listen for events to happen"""
         if not self.axis_data:
             self.axis_data = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: -1.0}#initilizate the axis you will use in this dictionary
-
+        if not self2.axis_data:
+            self2.axis_data = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: -1.0}#initilizate the axis you will use in this dictionary
+        
+        
         if not self.button_data:
             self.button_data = {}
             for i in range(self.controller.get_numbuttons()):
@@ -140,65 +143,11 @@ class PS4Controller(object):
                     pprint.pprint("Angle: "+str(angle_g)+"Speed: "+str(speed_g))
                     send(current_pwm_speed)
                     
-    def listen2(self2):
-        """Listen for events to happen"""
-
-        if not self2.axis_data:
-            self2.axis_data = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: -1.0}#initilizate the axis you will use in this dictionary
-
-        if not self2.button_data:
-            self2.button_data = {}
-            for i in range(self2.controller.get_numbuttons()):
-                self2.button_data[i] = False
-
-        if not self2.hat_data:
-            self2.hat_data = {}
-            for i in range(self2.controller.get_numhats()):
-                self2.hat_data[i] = (0, 0)
-
-        while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.JOYAXISMOTION:
-                        self2.axis_data[event.axis] = round(event.value, 2)
-                    elif event.type == pygame.JOYBUTTONUP:
-                        self2.button_data[event.button] = not self2.button_data[event.button]
-                        if event.button == 2:
-                            send(1500,90)
-                            exit()
-                        global velocity
-                        if event.button == 0:
-                            velocity=velocity+10
-                        if event.button == 1:
-                            velocity=velocity-10
-                        else:
-                            if event.button == 4:
-                                self2.button_data.update({5: False})
-                            elif event.button == 5:
-                                self2.button_data.update({4: False})
-                            #pprint.pprint("4: {}".format(self.button_data.get(4)))
-                            #pprint.pprint("5: {}".format(self.button_data.get(5)))
-                    elif event.type == pygame.JOYHATMOTION:
-                        self2.hat_data[event.hat] = event.value
-
-                    # Insert your code on what you would like to happen for each event here!
-                    # In the current setup, I have the state simply printing out to the screen.
-
-                    #pprint.pprint(self.axis_data.get(3))
-                    #pprint.pprint(get_speed(self.axis_data.get(
-                    #     4),self.axis_data.get(3) ,self.button_data.get(5),self.button_data.get(4)))
-                    # pprint.pprint(self.button_data.get(5))
-                    #pprint.pprint(self.button_data)
-                    current_speed = velocity
-                    #current_pwm_speed = get_angle_pwm(self2.axis_data.get(0))
-                    current_pwm_angle = get_angle_pwm(self2.axis_data.get(0))
-                    angle_g = current_pwm_angle
-                    pprint.pprint(" Angle: "+str(angle_g))
-                    send(current_pwm_angle)
+ 
 
 if __name__ == "__main__":
     ps4 = PS4Controller()
     ps4.init()
     ps4.listen()
 
-    ps4.init2()
-    ps4.listen2()
+    

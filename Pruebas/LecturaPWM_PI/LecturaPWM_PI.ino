@@ -1,6 +1,6 @@
 #include <PinChangeInt.h>
  
-#define MY_PIN 5 // we could choose any pin
+#define MY_PIN 2 // we could choose any pin
  
 volatile int pwm_value = 0;
 volatile int prev_time = 0;
