@@ -1,8 +1,6 @@
 from distutils.log import error
-import json
 import socket
 import time
-from typing_extensions import Self
 from numpy import not_equal
 
 class communicator():
@@ -14,7 +12,6 @@ class communicator():
     def get_ip_and_port(self,filename):
         with open(str(filename), "r") as a:
             dict = a.read().split(":")
-        #IP,PORT,BOOLEAN
         return dict[0],int(dict[1]),int(dict[2]),bool(int(dict[3]))
         
 
