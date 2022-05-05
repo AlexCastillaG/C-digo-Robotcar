@@ -1,0 +1,1 @@
+gst-launch-1.0 udpsrc port=5006 application/x-rtp,media=video,clock-rate=90000,encoding-name=H265,payload=96  ! rtph265depay ! avdec_h265 ! autovideosink  
