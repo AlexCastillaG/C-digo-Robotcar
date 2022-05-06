@@ -42,6 +42,29 @@ class receiver(communicator):
         print(data)
         return data
     
+class receiver_raspy(communicator):
+    
+    def __init__(self,IP,PORT,BUFFER):
+        self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
+        self.sock = self.create_socket()
+        self.delay = 0.01
+    
+    def create_socket(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((self.IP, self.PORT))
+        s.listen(1)
+        return s
+
+
+    def receive(self):
+        time.sleep(self.delay)
+        conn, addr = self.sock.accept()
+        data = conn.recv(self.BUFFER).decode("utf-8")
+        data = data.strip('][').split(', ')
+        conn.close()
+        print(data)
+        return data
+    
 class sender(communicator):
 
     

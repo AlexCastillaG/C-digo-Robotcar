@@ -1,7 +1,5 @@
 ##########Imports##########
 import time
-import os
-import sys, tty, termios
 import pigpio
 import RPi.GPIO as GPIO
 import socket,json
@@ -43,10 +41,11 @@ def initialization():
 initialization()
 
 while True:
+    time.sleep(0.01)
     data, addr = sock.recvfrom(1024)
     message= json.loads(data.decode())
     print("speed: %s"% message.get("speed")+" angle: %s"% message.get("angle"))
-    pi.set_servo_pulsewidth(Servo , angle_to_pwm(message.get("angle")))
+    pi.set_servo_pulsewidth(Servo , (message.get("angle")))
     pi.set_servo_pulsewidth(ESC,message.get("speed"))
 
 
