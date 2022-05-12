@@ -47,7 +47,7 @@ def turn_l():
     pwm.set_PWM_dutycycle(pwm_gpio,0)
 def turn_r():
     print('Turning rigth')
-    pwm.ChangeDutyCycle(angle_to_percent(120))º1º
+    pwm.ChangeDutyCycle(angle_to_percent(120))
 def turn_0():
     print('Straigth forward')
     pwm.ChangeDutyCycle(angle_to_percent(90))

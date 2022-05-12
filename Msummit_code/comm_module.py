@@ -13,7 +13,7 @@ class communicator():
         with open(str(filename), "r") as a:
             dict = a.read().split(":")
         return dict[0],int(dict[1]),int(dict[2]),bool(int(dict[3]))
-        
+
 
 
 
@@ -47,22 +47,23 @@ class receiver_raspy(communicator):
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
         self.sock = self.create_socket()
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.delay = 0.01
     
     def create_socket(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.IP, self.PORT))
         s.listen(1)
         return s
 
-
+        
     def receive(self):
         time.sleep(self.delay)
         conn, addr = self.sock.accept()
         data = conn.recv(self.BUFFER).decode("utf-8")
         data = data.strip('][').split(', ')
         conn.close()
-        print(data)
         return data
     
 class sender(communicator):
