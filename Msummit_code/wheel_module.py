@@ -14,15 +14,15 @@ class PS4Controller():
         self.controller = pygame.joystick.Joystick(usb_port)
 
         self.controller.init()
-        self.axis_data = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0} #Value of all the controller's axis
+        self.axis_data = {0: 0.0, 1: 1.0, 2: 1.0, 3: 0.0, 4: 0.0} #Value of all the controller's axis
         self.button_data = self.map_buttons() #Value all the controller's buttons
         self.deadman = False #Deadman will force the user to push a button if he/she want to move
-        self.max_speed = 5 #Set the max car speed
+        self.max_speed = 100 #Set the max car speed
         self.max_turn_angle = 90 #Set the max car turn angle 
         self.current_speed = 0 #Storage the current car speed
         self.current_angle = 0 #Storage the current car speed
         self.cal_angle = 90 #This var is used to set which angle is fuly forward
-        self.cal_speed = 77 #This var is used to set the neutral position of the throttle 
+        self.cal_speed = 1500 #This var is used to set the neutral position of the throttle 
         self.throttle_port = throttle_port_input
         self.brake_port = brake_port_input
         self.wheel_port = wheel_port_input
@@ -85,12 +85,12 @@ class PS4Controller():
                         print("Por seguridad se ha activado el protocolo de parada automática"+"\n"+"Debes mantener pulsado el deadman mientras conduce")
                     self.button_data[event.button] = not self.button_data[event.button]
                     if event.button == self.speedup_button:
-                        if self.max_speed >= 1900:
+                        if self.cal_speed+self.max_speed >= 1900:
                             break
                         else:
                             self.max_speed = self.max_speed+25
                     if event.button == self.speeddown_button:
-                        if self.max_speed <= 1100:
+                        if self.cal_speed+self.max_speed <= 1100:
                             break
                         else:
                             self.max_speed = self.max_speed-25
@@ -114,7 +114,7 @@ class PS4Controller():
             if self.deadman:
                 self.control_sender.send("Car",self.current_speed,self.current_angle)
             else:
-                self.control_sender.send("Car",77.00,90.00)
+                self.control_sender.send("Car",1500.00,90.00)
                 #print(speed,angle)
                 #print(self.joystick_wheel)
     def dual_send(self):
