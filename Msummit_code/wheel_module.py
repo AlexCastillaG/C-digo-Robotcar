@@ -85,15 +85,15 @@ class PS4Controller():
                         print("Por seguridad se ha activado el protocolo de parada automática"+"\n"+"Debes mantener pulsado el deadman mientras conduce")
                     self.button_data[event.button] = not self.button_data[event.button]
                     if event.button == self.speedup_button:
-                        if self.max_speed >= 90:
+                        if self.max_speed >= 1900:
                             break
                         else:
-                            self.max_speed = self.max_speed+5
+                            self.max_speed = self.max_speed+25
                     if event.button == self.speeddown_button:
-                        if self.max_speed <= 0:
+                        if self.max_speed <= 1100:
                             break
                         else:
-                            self.max_speed = self.max_speed-5
+                            self.max_speed = self.max_speed-25
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button == self.deadman_button:
                         self.deadman=True
