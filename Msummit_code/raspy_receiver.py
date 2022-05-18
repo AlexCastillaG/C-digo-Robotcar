@@ -4,7 +4,7 @@ import comm_module
 import pigpio
 import RPi.GPIO as GPIO
 import socket
-
+import logging 
 
 class RC_car():
     def __init__(self,PORT,servo_pin,esc_pin):
@@ -14,7 +14,8 @@ class RC_car():
         self.receiver = comm_module.receiver_raspy("",self.PORT,1024)
         GPIO.setmode(GPIO.BOARD) #Use Board numerotation mode
         GPIO.setwarnings(False) #Disable warnings
-        self.pi = pigpio.pi() # Connect to local Pi.           
+        self.pi = pigpio.pi() # Connect to local Pi.
+        self.logger = None
 
     def get_pwm(self,angle):
         return (angle/90) + 1500
@@ -31,6 +32,12 @@ class RC_car():
         angle_as_percent = angle * ratio
 
         return start + angle_as_percent
+    
+    def save_log(self, name):
+        logging.basicConfig(filename="{}.log".format(name), format='%(asctime)s %(message)s', filemode='w') 
+        self.logger=logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
+        pass
 
     def initialization(self):
   
@@ -48,9 +55,16 @@ class RC_car():
 
     def start(self):
         self.initialization()
+        self.save_log("logger")
 
         while True:
-            data = self.receiver.receive()
+            try:
+                data = self.receiver.receive()
+                self.logger.info(data)
+            except Exception as e:
+                print("Unknown error: ",e)
+                self.logger.error(e)
+                
             print("speed: ", data[0]," angle:",self.angle_to_percent(float(data[1])))
             
             self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
