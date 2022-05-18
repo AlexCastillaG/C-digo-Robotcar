@@ -52,7 +52,6 @@ class receiver_raspy(communicator):
     
     def create_socket(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.IP, self.PORT))
         s.listen(1)
         return s
@@ -65,6 +64,22 @@ class receiver_raspy(communicator):
         data = data.strip('][').split(', ')
         conn.close()
         return data
+    
+class tcp_sender(communicator):
+    def send(self):
+        sock = socket.create_connection(( self.IP,self.PORT))
+        message = b'This is the message.  It will be repeated.'
+        print('sending {!r}'.format(message))
+        
+        self.sock.sendall(message)
+
+        amount_received = 0
+        amount_expected = len(message)
+
+        while amount_received < amount_expected:
+            data = self.sock.recv(16)
+            amount_received += len(data)
+            print('received {!r}'.format(data))
     
 class sender(communicator):
 
