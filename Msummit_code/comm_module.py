@@ -60,27 +60,40 @@ class receiver_raspy(communicator):
     def receive(self):
         time.sleep(self.delay)
         conn, addr = self.sock.accept()
-        data = conn.recv(self.BUFFER).decode("utf-8")
-        data = data.strip('][').split(', ')
-        conn.close()
-        return data
+        try:
+            print('client connected:', addr)
+            while True:
+                data = conn.recv(16)
+                print('received {!r}'.format(data))
+                if data:
+                    conn.sendall(data)
+                else:
+                    break
+        finally:
+            conn.close()
     
 class tcp_sender(communicator):
-    def send(self):
+    def send(self,device_name,*args):
         sock = socket.create_connection(( self.IP,self.PORT))
-        message = b'This is the message.  It will be repeated.'
-        print('sending {!r}'.format(message))
-        
-        self.sock.sendall(message)
+        try:
+            message=[]
+            time.sleep(self.delay)
+            for n in args:
+                message.append(n)
+            print('sending {!r}'.format(message))
+            
+            self.sock.sendall(message)
 
-        amount_received = 0
-        amount_expected = len(message)
+            amount_received = 0
+            amount_expected = len(message)
 
-        while amount_received < amount_expected:
-            data = self.sock.recv(16)
-            amount_received += len(data)
-            print('received {!r}'.format(data))
-    
+            while amount_received < amount_expected:
+                data = self.sock.recv(16)
+                amount_received += len(data)
+                print('received {!r}'.format(data))
+        finally:
+            print('closing socket')
+            sock.close()
 class sender(communicator):
 
     
