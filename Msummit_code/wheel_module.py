@@ -113,6 +113,7 @@ class PS4Controller():
             self.listen()
             if self.deadman:
                 self.control_sender.send("Car",self.current_speed,self.current_angle)
+                print("Speed: ",self.current_speed," Angle: ",self.current_angle)
             else:
                 self.control_sender.send("Car",1500.00,90.00)
                 #print(speed,angle)
