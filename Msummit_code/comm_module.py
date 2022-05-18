@@ -85,5 +85,7 @@ class sender(communicator):
         except ConnectionRefusedError:
             print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
         except ConnectionResetError:
-            print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
+            print("Devices has been disconnected "+"to {}".format(device_name))
+        except TimeoutError:
+            print("Devices has been disconnected for too long, reconnect or quit the program")
         #print(data)
