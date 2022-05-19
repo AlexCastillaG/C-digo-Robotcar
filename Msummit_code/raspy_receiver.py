@@ -33,11 +33,11 @@ class RC_car():
 
         return start + angle_as_percent
     
-    def save_log(self, name,boolean_opt):
-        if boolean_opt:
-            logging.basicConfig(filename="{}.log".format(name), format='%(asctime)s %(message)s', filemode='w') 
-            self.logger=logging.getLogger()
-            self.logger.setLevel(logging.DEBUG)
+    def save_log(self, name):
+
+        logging.basicConfig(filename="{}.log".format(name), format='%(asctime)s %(message)s', filemode='w') 
+        self.logger=logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
         pass
 
     def initialization(self):
@@ -56,18 +56,18 @@ class RC_car():
 
     def start(self):
         self.initialization()
-        self.save_log("logger", 0)
+        #self.save_log("logger")
 
         while True:
             try:
                 data = self.receiver.receive()
-                self.logger.info(data)
+                #self.logger.info(data)
             except Exception as e:
                 data=[90,1500]
                 self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))   
                 print("Unknown error: ",e)
-                self.logger.error(e)
+                #self.logger.error(e)
                 
             print("speed: ", data[0]," angle:",self.angle_to_percent(float(data[1])))
             
