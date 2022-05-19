@@ -68,9 +68,9 @@ class receiver_raspy(communicator):
                 if data:
                     conn.sendall(data)
                 else:
-                    pass
-        finally:
-            conn.close()
+                    break
+        except:
+            print("error")
     
 class tcp_sender(communicator):
     def send(self,device_name,*args):
