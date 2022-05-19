@@ -33,10 +33,11 @@ class RC_car():
 
         return start + angle_as_percent
     
-    def save_log(self, name):
-        logging.basicConfig(filename="{}.log".format(name), format='%(asctime)s %(message)s', filemode='w') 
-        self.logger=logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
+    def save_log(self, name,boolean_opt):
+        if boolean_opt:
+            logging.basicConfig(filename="{}.log".format(name), format='%(asctime)s %(message)s', filemode='w') 
+            self.logger=logging.getLogger()
+            self.logger.setLevel(logging.DEBUG)
         pass
 
     def initialization(self):
@@ -55,7 +56,7 @@ class RC_car():
 
     def start(self):
         self.initialization()
-        self.save_log("logger")
+        self.save_log("logger", 0)
 
         while True:
             try:
