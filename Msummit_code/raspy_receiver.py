@@ -62,6 +62,9 @@ class RC_car():
                 data = self.receiver.receive()
                 self.logger.info(data)
             except Exception as e:
+                data=[90,1500]
+                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
+                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))   
                 print("Unknown error: ",e)
                 self.logger.error(e)
                 
