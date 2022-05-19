@@ -63,7 +63,7 @@ class receiver_raspy(communicator):
         try:
             print('client connected:', addr)
             while True:
-                data = conn.recv(16)
+                data = conn.recv(1024)
                 print('received {!r}'.format(data))
                 if data:
                     conn.sendall(data)
@@ -82,18 +82,25 @@ class tcp_sender(communicator):
                 message.append(n)
             print('sending {!r}'.format(message))
             
-            self.sock.sendall(message)
+            sock.sendall(str(message).encode("utf-8"))
 
             amount_received = 0
             amount_expected = len(message)
 
             while amount_received < amount_expected:
-                data = self.sock.recv(16)
+                data = sock.recv(1024)
                 amount_received += len(data)
                 print('received {!r}'.format(data))
-        finally:
-            print('closing socket')
-            sock.close()
+        except ConnectionRefusedError:
+            print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
+        except ConnectionResetError:
+            print("Devices has been disconnected "+"from {}".format(device_name))
+        except TimeoutError:
+            print("Devices has been disconnected for too long, reconnect or quit the program")
+        except OSError:
+            print("There is no connection available, connect to the rigth router")
+        except Exception as e:
+            print("Unknown error: " , e)
 class sender(communicator):
 
     
