@@ -68,7 +68,7 @@ class receiver_raspy(communicator):
                 if data:
                     conn.sendall(data)
                 else:
-                    break
+                    pass
         finally:
             conn.close()
     
@@ -82,7 +82,9 @@ class tcp_sender(communicator):
                 message.append(n)
             print('sending {!r}'.format(message))
             
-            sock.sendall(str(message).encode("utf-8"))
+            message = str(message).encode("utf-8")
+            
+            sock.sendall(message)
 
             amount_received = 0
             amount_expected = len(message)
