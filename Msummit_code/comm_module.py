@@ -14,7 +14,9 @@ class communicator():
             dict = a.read().split(":")
         return dict[0],int(dict[1]),int(dict[2]),bool(int(dict[3]))
 
-
+    def decode_data(self,data):
+        data = data.decode("utf-8").strip('][').split(', ')
+        return data
 
 
 
@@ -36,8 +38,8 @@ class receiver(communicator):
     def receive(self):
         time.sleep(self.delay)
         conn, addr = self.sock.accept()
-        data = conn.recv(self.BUFFER).decode("utf-8")
-        data = data.strip('][').split(', ')
+        data = conn.recv(self.BUFFER)
+        data = self.decode_data(data)
         conn.close()
         print(data)
         return data
@@ -60,9 +62,9 @@ class receiver_raspy(communicator):
         self.conn = self.create_socket()
         while True:
             self.delay = 0.01
-            data = self.conn.recv(self.BUFFER).decode("utf-8")
-            data = data.strip('][').split(', ')
-            print(data)
+            data = self.conn.recv(self.BUFFER)
+            message = self.decode_data(data)
+            print(message)
             if not data:
                 break
             self.conn.sendall(data)
