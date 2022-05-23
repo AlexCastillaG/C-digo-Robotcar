@@ -61,7 +61,8 @@ class receiver_raspy(communicator):
         while True:
             self.delay = 0.01
             data = self.conn.recv(self.BUFFER)
-            print(data.decode("utf-8"))
+            data = data.strip('][').split(', ').decode("utf-8")
+            print(data)
             if not data:
                 break
             self.conn.sendall(data)
@@ -85,7 +86,12 @@ class tcp_sender(communicator):
         while True:
             self.delay = 0.01
             try:
-                self.s.sendall(str("hola").encode("utf-8"))
+                data=[]
+                time.sleep(self.delay)
+                for n in args:
+                    data.append(n)
+                message = str(data).encode("utf-8")            
+                self.s.sendall(message)
                 data = self.s.recv(self.BUFFER)
                 print("echo: ",data)
                 
