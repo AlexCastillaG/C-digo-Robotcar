@@ -1,5 +1,4 @@
 import wheel_module
-import comm_module
 import time
 
 
