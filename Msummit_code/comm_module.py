@@ -46,63 +46,64 @@ class receiver_raspy(communicator):
     
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
-        self.sock = self.create_socket()
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.delay = 0.01
+
     
     def create_socket(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((self.IP, self.PORT))
         s.listen(1)
-        return s
+        conn, addr = s.accept()
+        return conn
 
         
     def receive(self):
-        time.sleep(self.delay)
-        conn, addr = self.sock.accept()
-        try:
-            print('client connected:', addr)
-            while True:
-                data = conn.recv(1024)
-                print('received {!r}'.format(data))
-                if data:
-                    conn.sendall(data)
-                else:
-                    break
-        except:
-            print("error")
+        self.conn = self.create_socket()
+        while True:
+            self.delay = 0.01
+            data = self.conn.recv(self.BUFFER)
+            print(data.decode("utf-8"))
+            if not data:
+                break
+            self.conn.sendall(data)
+        self.conn.close()
     
 class tcp_sender(communicator):
+    
+    def __init__(self,IP,PORT,BUFFER):
+        self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
+        self.data=[]
+        
+    def create_socket(self):  
+      
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((self.IP, self.PORT))      
+      
     def send(self,device_name,*args):
-        sock = socket.create_connection(( self.IP,self.PORT))
-        try:
-            message=[]
-            time.sleep(self.delay)
-            for n in args:
-                message.append(n)
-            print('sending {!r}'.format(message))
-            
-            message = str(message).encode("utf-8")
-            
-            sock.sendall(message)
-
-            amount_received = 0
-            amount_expected = len(message)
-
-            while amount_received < amount_expected:
-                data = sock.recv(1024)
-                amount_received += len(data)
-                print('received {!r}'.format(data))
-        except ConnectionRefusedError:
-            print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
-        except ConnectionResetError:
-            print("Devices has been disconnected "+"from {}".format(device_name))
-        except TimeoutError:
-            print("Devices has been disconnected for too long, reconnect or quit the program")
-        except OSError:
-            print("There is no connection available, connect to the rigth router")
-        except Exception as e:
-            print("Unknown error: " , e)
+        
+        self.create_socket()
+        
+        while True:
+            self.delay = 0.01
+            try:
+                self.s.sendall(str("hola").encode("utf-8"))
+                data = self.s.recv(self.BUFFER)
+                print("echo: ",data)
+                
+            except ConnectionRefusedError:
+                print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
+                self.s.close()
+            except ConnectionResetError:
+                print("Devices has been disconnected "+"from {}".format(device_name))
+                self.s.close()
+            except TimeoutError:
+                print("Devices has been disconnected for too long, reconnect or quit the program")
+                self.s.close()
+            except OSError:
+                print("There is no connection available, connect to the rigth router")
+                self.s.close()
+            except Exception as e:
+                print("Unknown error: " , e)
+                self.s.close()
 class sender(communicator):
 
     
@@ -131,3 +132,8 @@ class sender(communicator):
             print("Unknown error: " , e)
             
         #print(data)
+            
+if __name__=="__main__":
+    sender = tcp_sender("127.0.0.1",5009,1024)
+    sender.send("Prueba","message 1")
+
