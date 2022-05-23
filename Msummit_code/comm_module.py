@@ -105,6 +105,7 @@ class tcp_sender(communicator):
                 self.s.close()
             except OSError:
                 print("There is no connection available, connect to the rigth router")
+                self.create_socket()
                 self.s.close()
             except KeyboardInterrupt:
                 pass
