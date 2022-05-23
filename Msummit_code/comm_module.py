@@ -83,9 +83,6 @@ class tcp_sender(communicator):
       
     def send(self,device_name,*args):
         
-        self.create_socket()
-        
-        while True:
             self.delay = 0.01
             try:
                 data=[]

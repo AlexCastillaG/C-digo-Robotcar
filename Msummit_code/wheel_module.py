@@ -109,6 +109,7 @@ class PS4Controller():
             self.GUI_sender.send("GUI",self.current_speed,self.current_angle,self.deadman,self.max_speed)
 
     def move_car(self):
+        self.control_sender.create_socket()
         while True:
             self.listen()
             if self.deadman:
