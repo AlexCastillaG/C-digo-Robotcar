@@ -63,16 +63,22 @@ class RC_car():
                 data = self.receiver.receive()
                 #self.logger.info(data)
             except Exception as e:
-                data=[90,1500]
+                data=[1500,90]
                 self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))   
                 print("Unknown error: ",e)
+                continue
                 #self.logger.error(e)
                 
-            print("speed: ", data[0]," angle:",self.angle_to_percent(float(data[1])))
-            
-            self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
-            self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
+            try:
+                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
+                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
+            except:
+                data=[1500,90]
+                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
+                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
+                continue
+                
 
 if __name__ == "__main__":
     summit = RC_car(5009,13,18)
