@@ -92,7 +92,7 @@ class tcp_sender(communicator):
                 message = str(data).encode("utf-8")            
                 self.s.sendall(message)
                 data = self.s.recv(self.BUFFER)
-                print("echo: ",data)
+                #print("echo: ",data)
                 
             except ConnectionRefusedError:
                 print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
@@ -106,6 +106,8 @@ class tcp_sender(communicator):
             except OSError:
                 print("There is no connection available, connect to the rigth router")
                 self.s.close()
+            except KeyboardInterrupt:
+                pass
             except Exception as e:
                 print("Unknown error: " , e)
                 self.s.close()
