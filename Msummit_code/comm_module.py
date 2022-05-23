@@ -60,8 +60,8 @@ class receiver_raspy(communicator):
         self.conn = self.create_socket()
         while True:
             self.delay = 0.01
-            data = self.conn.recv(self.BUFFER)
-            data = data.strip('][').split(', ').decode("utf-8")
+            data = self.conn.recv(self.BUFFER).decode("utf-8")
+            data = data.strip('][').split(', ')
             print(data)
             if not data:
                 break
