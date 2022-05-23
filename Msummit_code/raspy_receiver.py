@@ -62,22 +62,20 @@ class RC_car():
             try:
                 data = self.receiver.receive()
                 #self.logger.info(data)
+                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
+                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
+            except ConnectionResetError:
+                print("El mando ha sido desconectado")
+                data=[90,1500]
+                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
+                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))
             except Exception as e:
-                data=[1500,90]
+                data=[90,1500]
                 self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))   
                 print("Unknown error: ",e)
                 continue
-                #self.logger.error(e)
-                
-            try:
-                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
-                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
-            except:
-                data=[1500,90]
-                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
-                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
-                continue
+
                 
 
 if __name__ == "__main__":
