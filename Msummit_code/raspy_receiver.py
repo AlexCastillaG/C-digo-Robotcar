@@ -11,7 +11,7 @@ class RC_car():
         self.PORT = PORT
         self.servo_pin = servo_pin
         self.esc_pin = esc_pin
-        self.receiver = comm_module.receiver_raspy("",self.PORT,1024)
+        self.receiver = comm_module.tcp_request("192.168.8.103",self.PORT,1024)
         GPIO.setmode(GPIO.BOARD) #Use Board numerotation mode
         GPIO.setwarnings(False) #Disable warnings
         self.pi = pigpio.pi() # Connect to local Pi.
@@ -39,7 +39,11 @@ class RC_car():
         self.logger=logging.getLogger()
         self.logger.setLevel(logging.DEBUG)
         pass
-
+    def stop(self):
+        data=[90,1500]
+        self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
+        self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))     
+        
     def initialization(self):
   
         self.pi.set_servo_pulsewidth(self.servo_pin , 1500)
@@ -66,15 +70,14 @@ class RC_car():
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
             except ConnectionResetError:
                 print("El mando ha sido desconectado")
-                data=[90,1500]
-                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
-                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))
+                self.stop()
+            except socket.timeout:
+                print("No se puede conectar con el control")
+                self.stop()
             except Exception as e:
-                data=[90,1500]
-                self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
-                self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))   
+                self.stop()
                 print("Unknown error: ",e)
-                continue
+                raise
 
                 
 

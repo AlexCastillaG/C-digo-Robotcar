@@ -44,7 +44,7 @@ class receiver(communicator):
         print(data)
         return data
     
-class receiver_raspy(communicator):
+class server(communicator):
     
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
@@ -52,37 +52,26 @@ class receiver_raspy(communicator):
     
     def create_socket(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.set_keepalive_linux(s)
         s.bind((self.IP, self.PORT))
         s.listen(1)
         conn, addr = s.accept()
         return conn
     
-    def set_keepalive_linux(self,sock, after_idle_sec=1, interval_sec=3, max_fails=5):
-        """Set TCP keepalive on an open socket.
-
-        It activates after 1 second (after_idle_sec) of idleness,
-        then sends a keepalive ping once every 3 seconds (interval_sec),
-        and closes the connection after 5 failed ping (max_fails), or 15 seconds
-        """
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, after_idle_sec)
-        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, interval_sec)
-        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, max_fails)
-        
-    def receive(self):
+    def send(self,data_wheel):
         self.conn = self.create_socket()
         while True:
             self.delay = 0.01
             data = self.conn.recv(self.BUFFER)
             message = self.decode_data(data)
-            print(message)
+            print("received: " , message)
             if not data:
                 break
-            self.conn.sendall(data)
+            data = data_wheel
+            print("sending :" , data)
+            self.conn.sendall(str(data).encode("utf-8"))
         self.conn.close()
-    
-class tcp_sender(communicator):
+        self.send()
+class tcp_request(communicator):
     
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
@@ -91,18 +80,26 @@ class tcp_sender(communicator):
     def create_socket(self):  
       
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((self.IP, self.PORT))      
-      
-    def send(self,device_name,*args):
-        
-            self.delay = 0.01
+        while True:
             try:
-                data=[]
-                time.sleep(self.delay)
-                for n in args:
-                    data.append(n)
-                message = str(data).encode("utf-8")            
+                self.s.connect((self.IP, self.PORT))
+                break
+            except socket.error:
+                print("El control esta desconectado")
+                continue
+            
+    def request(self,device_name):
+        
+        self.create_socket()
+        self.data="hello"
+        self.delay = 0.01
+        while True:
+            time.sleep(self.delay)
+            message = str(self.data).encode("utf-8")
+            print("sending: " , message)
+            try:
                 self.s.sendall(message)
+<<<<<<< HEAD
                 data = self.s.recv(self.BUFFER)
                 #print("echo: ",data)
                 
@@ -124,11 +121,21 @@ class tcp_sender(communicator):
             except Exception as e:
                 print("Unknown error: " , e)
                 self.s.close()
+=======
+                self.data = self.decode_data(self.s.recv(self.BUFFER))
+            except socket.error:
+                print("Se cerro el programa de control durante la trasmision")
+                self.create_socket()
+            print("receiving:" , self.data)
+            #print("echo: ",data)
+        self.s.close()
+
+>>>>>>> 95ecebcbc9b3ac4fa028eb2bd5d82aad314908d9
 class sender(communicator):
 
     
     def send(self,device_name,*args):  # send the information to a client
-        data=[]
+        data=""
         time.sleep(self.delay)
         for n in args:
             data.append(n)
@@ -156,4 +163,6 @@ class sender(communicator):
 if __name__=="__main__":
     sender = tcp_sender("127.0.0.1",5009,1024)
     sender.send("Prueba","message 1")
+
+
 
