@@ -112,10 +112,10 @@ class PS4Controller():
         while True:
             self.listen()
             if self.deadman:
-                self.control_sender.send("Car",self.current_speed,self.current_angle)
+                self.control_sender.send(self.current_speed,self.current_angle)
                 print("Speed: ",self.current_speed," Angle: ",self.current_angle)
             else:
-                self.control_sender.send("Car",1500.00,90.00)
+                self.control_sender.send(1500.00,90.00)
                 #print(speed,angle)
                 #print(self.joystick_wheel)
     def dual_send(self):

@@ -57,16 +57,19 @@ class server(communicator):
         conn, addr = s.accept()
         return conn
     
-    def send(self,data_wheel):
+    def send(self,*args):
         self.conn = self.create_socket()
         while True:
+            datawheel =[]
+            for item in args:
+                datawheel.append(item)
             self.delay = 0.01
             data = self.conn.recv(self.BUFFER)
             message = self.decode_data(data)
             print("received: " , message)
             if not data:
                 break
-            data = data_wheel
+            data = datawheel
             print("sending :" , data)
             self.conn.sendall(str(data).encode("utf-8"))
         self.conn.close()
