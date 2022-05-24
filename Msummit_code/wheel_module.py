@@ -32,8 +32,7 @@ class PS4Controller():
         self.deadman_button = deadman_port #Select what button will act as deadman
         self.speedup_button = speedup_port #Select what button will act as speedup
         self.speeddown_button = speeddown_port #Select what button will act as speeddown
-        self.control_sender = comm_module.tcp_sender("192.168.8.101",5009,1024)
-        self.GUI_sender = comm_module.sender("GUI_netinfo.txt")
+        self.control_sender = comm_module.server("",5009,1024)
 
     def get_params(self):
         #print(self.current_speed,self.current_angle,self.deadman,self.max_speed)

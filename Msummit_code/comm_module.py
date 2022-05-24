@@ -99,29 +99,6 @@ class tcp_request(communicator):
             print("sending: " , message)
             try:
                 self.s.sendall(message)
-<<<<<<< HEAD
-                data = self.s.recv(self.BUFFER)
-                #print("echo: ",data)
-                
-            except ConnectionRefusedError:
-                print("Connection lost: Attempting to reconnect "+"to {}".format(device_name))
-                self.s.close()
-            except ConnectionResetError:
-                print("Devices has been disconnected "+"from {}".format(device_name))
-                self.s.close()
-            except TimeoutError:
-                print("Devices has been disconnected for too long, reconnect or quit the program")
-                self.s.close()
-            except OSError:
-                print("There is no connection available, connect to the rigth router")
-                self.create_socket()
-                self.s.close()
-            except KeyboardInterrupt:
-                pass
-            except Exception as e:
-                print("Unknown error: " , e)
-                self.s.close()
-=======
                 self.data = self.decode_data(self.s.recv(self.BUFFER))
             except socket.error:
                 print("Se cerro el programa de control durante la trasmision")
@@ -130,7 +107,6 @@ class tcp_request(communicator):
             #print("echo: ",data)
         self.s.close()
 
->>>>>>> 95ecebcbc9b3ac4fa028eb2bd5d82aad314908d9
 class sender(communicator):
 
     
