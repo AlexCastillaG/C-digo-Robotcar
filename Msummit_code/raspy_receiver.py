@@ -61,12 +61,13 @@ class RC_car():
     def start(self):
         self.initialization()
         #self.save_log("logger")
-
+        self.stop()
+        
         while True:
             try:
-                self.receiver.request("Raspy")
+                
                 #self.logger.info(data)
-                data = receiver.data
+                data = self.receiver.request()
                 print(data)
                 self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))

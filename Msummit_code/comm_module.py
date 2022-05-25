@@ -21,7 +21,7 @@ class communicator():
 
 
     
-class udp_receiver(communicator):
+class receiver(communicator):
     
     def __init__(self,filename):
         self.IP,self.PORT,self.BUFFER,self.CHECK = self.get_ip_and_port(filename)
@@ -82,7 +82,7 @@ class tcp_request(communicator):
     
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
-        self.data=[]
+        self.data="hello"
         
     def create_socket(self):  
       
@@ -92,29 +92,30 @@ class tcp_request(communicator):
                 self.s.connect((self.IP, self.PORT))
                 break
             except socket.error:
+                self.s.close()
                 print("El control esta desconectado")
                 continue
             
-    def request(self,device_name):
+    def request(self):
         
         self.create_socket()
-        self.data="hello"
-        self.delay = 0.01
-        while True:
-            time.sleep(self.delay)
-            message = str(self.data).encode("utf-8")
-            print("sending: " , message)
-            try:
-                self.s.sendall(message)
-                self.data = self.decode_data(self.s.recv(self.BUFFER))
-            except socket.error:
-                print("Se cerro el programa de control durante la trasmision")
-                self.create_socket()
-            print("receiving:" , self.data)
-            #print("echo: ",data)
-        self.s.close()
 
-class udp_sender(communicator):
+
+        time.sleep(0.01)
+        message = str(self.data).encode("utf-8")
+        print("sending: " , message)
+        try:
+            self.s.sendall(message)
+            self.data = self.decode_data(self.s.recv(self.BUFFER))
+        except socket.error:
+            print("Se cerro el programa de control durante la trasmision")
+            self.s.close()
+            self.create_socket()
+        print("receiving:" , self.data)
+        #print("echo: ",data)
+        return self.data
+
+class sender(communicator):
 
     
     def send(self,device_name,*args):  # send the information to a client
@@ -143,9 +144,5 @@ class udp_sender(communicator):
             
         #print(data)
             
-if __name__=="__main__":
-    sender = tcp_sender("127.0.0.1",5009,1024)
-    sender.send("Prueba","message 1")
-
 
 
