@@ -21,7 +21,7 @@ class communicator():
 
 
     
-class receiver(communicator):
+class udp_receiver(communicator):
     
     def __init__(self,filename):
         self.IP,self.PORT,self.BUFFER,self.CHECK = self.get_ip_and_port(filename)
@@ -110,7 +110,7 @@ class tcp_request(communicator):
             #print("echo: ",data)
         self.s.close()
 
-class sender(communicator):
+class udp_sender(communicator):
 
     
     def send(self,device_name,*args):  # send the information to a client
