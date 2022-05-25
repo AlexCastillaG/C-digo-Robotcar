@@ -103,9 +103,6 @@ class PS4Controller():
         self.current_speed = self.get_speed(self.joystick_throttle, self.joystick_brake)
         self.current_angle = self.get_angle_pwm(self.joystick_wheel)
 
-    def GUI_send(self):
-        while True:
-            self.GUI_sender.send("GUI",self.current_speed,self.current_angle,self.deadman,self.max_speed)
 
     def move_car(self):
         self.control_sender.create_socket()
@@ -118,12 +115,3 @@ class PS4Controller():
                 self.control_sender.send(1500.00,90.00)
                 #print(speed,angle)
                 #print(self.joystick_wheel)
-    def dual_send(self):
-        GUI=threading.Thread(target=self.GUI_send)
-        GUI.start()
-
-        car=threading.Thread(target=self.move_car)
-        car.start()
-
-        car.join()
-        GUI.join()    

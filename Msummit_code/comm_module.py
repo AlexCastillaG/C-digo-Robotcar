@@ -48,6 +48,8 @@ class server(communicator):
     
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
+        self.conn = self.create_socket()
+
 
     
     def create_socket(self):
@@ -55,25 +57,27 @@ class server(communicator):
         s.bind((self.IP, self.PORT))
         s.listen(1)
         conn, addr = s.accept()
-        return conn
+        return conn      
     
     def send(self,*args):
-        self.conn = self.create_socket()
-        while True:
-            datawheel =[]
-            for item in args:
-                datawheel.append(item)
-            self.delay = 0.01
-            data = self.conn.recv(self.BUFFER)
-            message = self.decode_data(data)
-            print("received: " , message)
-            if not data:
-                break
-            data = datawheel
-            print("sending :" , data)
-            self.conn.sendall(str(data).encode("utf-8"))
-        self.conn.close()
-        self.send()
+        to_send_data= []
+        
+        for item in args:
+            to_send_data.append(item)
+            
+        self.delay = 0.01
+        data = self.conn.recv(self.BUFFER)
+        message = self.decode_data(data)
+        #print("received: " , message)
+        
+        if not data:
+            self.conn.close()
+            self.conn = self.create_socket()
+            
+        data = to_send_data
+        #print("sending :" , data)
+        self.conn.sendall(str(data).encode("utf-8"))
+        
 class tcp_request(communicator):
     
     def __init__(self,IP,PORT,BUFFER):
