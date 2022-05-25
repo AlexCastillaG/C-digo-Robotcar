@@ -64,8 +64,10 @@ class RC_car():
 
         while True:
             try:
-                data = self.receiver.receive()
+                self.receiver.request("Raspy")
                 #self.logger.info(data)
+                data = receiver.data
+                print(data)
                 self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
             except ConnectionResetError:
