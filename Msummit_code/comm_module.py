@@ -56,9 +56,10 @@ class server(communicator):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((self.IP, self.PORT))
         s.listen(1)
-        conn, addr = s.accept()
+        conn, self.addr = s.accept()
+        print("Se conecto un nuevo dispositivo con ip ",self.addr[0], " por el puerto ",self.addr[1])
         return conn      
-    
+
     def send(self,*args):
         to_send_data= []
         
@@ -66,11 +67,24 @@ class server(communicator):
             to_send_data.append(item)
             
         self.delay = 0.01
-        data = self.conn.recv(self.BUFFER)
-        message = self.decode_data(data)
-        #print("received: " , message)
+        try:
+            data = self.conn.recv(self.BUFFER)
+        except ConnectionAbortedError:
+            print("El dispositivo con ip ",self.addr[0], " y puerto ",self.addr[1]," se desconecto")
+            data = None
+        except ConnectionResetError:
+            print("El dispositivo con ip ",self.addr[0], " y puerto ",self.addr[1]," se desconecto")
+            data = None
+        except TimeoutError:
+            print("Se perdio la conexion con el dispositivo con ip ",self.addr[0], " y puerto ",self.addr[1])
+            data = None      
+        except Exception as e:
+            print("Error desconocido: ",e)  
+            data = None 
+
         
         if not data:
+            print("No se recibieron datos del dispositivo con ip ",self.addr[0], " y puerto ",self.addr[1])
             self.conn.close()
             self.conn = self.create_socket()
             

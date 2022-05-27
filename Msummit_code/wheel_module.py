@@ -105,7 +105,6 @@ class PS4Controller():
 
 
     def move_car(self):
-        self.control_sender.create_socket()
         while True:
             self.listen()
             if self.deadman:
