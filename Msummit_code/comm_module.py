@@ -41,7 +41,6 @@ class receiver(communicator):
         data = conn.recv(self.BUFFER)
         data = self.decode_data(data)
         conn.close()
-        print(data)
         return data
     
 class server(communicator):
@@ -70,6 +69,7 @@ class server(communicator):
         message = self.decode_data(data)
         #print("received: " , message)
         
+    
         if not data:
             self.conn.close()
             self.conn = self.create_socket()
@@ -83,36 +83,22 @@ class tcp_request(communicator):
     def __init__(self,IP,PORT,BUFFER):
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
         self.data="hello"
-        
-    def create_socket(self):  
-      
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        while True:
-            try:
-                self.s.connect((self.IP, self.PORT))
-                break
-            except socket.error:
-                self.s.close()
-                print("El control esta desconectado")
-                continue
-            
-    def request(self):
-        
         self.create_socket()
 
+        
+    def create_socket(self):  
+   
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((self.IP, self.PORT))
+
+            
+    def request(self):
 
         time.sleep(0.01)
         message = str(self.data).encode("utf-8")
-        print("sending: " , message)
-        try:
-            self.s.sendall(message)
-            self.data = self.decode_data(self.s.recv(self.BUFFER))
-        except socket.error:
-            print("Se cerro el programa de control durante la trasmision")
-            self.s.close()
-            self.create_socket()
+        self.data = self.decode_data(self.s.recv(self.BUFFER))
+        self.s.sendall(message)
         print("receiving:" , self.data)
-        #print("echo: ",data)
         return self.data
 
 class sender(communicator):

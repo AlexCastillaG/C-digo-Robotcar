@@ -4,23 +4,51 @@ import comm_module
 import pigpio
 import RPi.GPIO as GPIO
 import socket
-import logging 
+import logging
+import traceback
+
 
 class RC_car():
     def __init__(self,PORT,servo_pin,esc_pin):
         self.PORT = PORT
         self.servo_pin = servo_pin
         self.esc_pin = esc_pin
-        self.receiver = comm_module.tcp_request("192.168.8.103",self.PORT,1024)
+        logging.basicConfig(filename='msummit.log', level=logging.DEBUG, 
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+        self.logger=logging.getLogger(__name__)            
         GPIO.setmode(GPIO.BOARD) #Use Board numerotation mode
         GPIO.setwarnings(False) #Disable warnings
         self.pi = pigpio.pi() # Connect to local Pi.
-        self.logger = None
+        while True:
+                    
+            try:
+                self.receiver = comm_module.tcp_request("192.168.8.103",self.PORT,1024)
+                break
+            except ConnectionResetError:
+                print("El mando ha sido desconectado", traceback.format_exc())
+                continue
+            except ConnectionRefusedError:
+                print("El servidor esta offline, intentando reconectar", traceback.format_exc())
+                continue
+            except OSError:
+                print("El dispositivo no esta conectado a internet", traceback.format_exc())
+                continue
+            except Exception:
+                print("Unknown error: ", traceback.format_exc())
+                raise
+
 
     def get_pwm(self,angle):
         return (angle/90) + 1500
 
-
+    def log_err(self,error):
+        self.logger.error(err)
+        print(error)
+        
+    def log_info(self,info):
+        self.logger.info(info)
+        print(info)
+        
     def angle_to_percent(self,angle):
         if angle > 180 or angle < 0:
             return False
@@ -33,16 +61,11 @@ class RC_car():
 
         return start + angle_as_percent
     
-    def save_log(self, name):
-
-        logging.basicConfig(filename="{}.log".format(name), format='%(asctime)s %(message)s', filemode='w') 
-        self.logger=logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
-        pass
     def stop(self):
         data=[90,1500]
         self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
         self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))     
+        print("Se activo la parada de emergencia")
         
     def initialization(self):
   
@@ -59,31 +82,39 @@ class RC_car():
         self.pi.set_servo_pulsewidth(self.esc_pin,1500)
 
     def start(self):
-        self.initialization()
-        #self.save_log("logger")
-        self.stop()
-        
+
         while True:
             try:
                 
                 #self.logger.info(data)
                 data = self.receiver.request()
-                print(data)
                 self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
                 self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
             except ConnectionResetError:
-                print("El mando ha sido desconectado")
                 self.stop()
-            except socket.timeout:
-                print("No se puede conectar con el control")
+                self.receiver.s.close()
+                print("El mando ha sido desconectado", traceback.format_exc())
+            except ConnectionRefusedError:
                 self.stop()
-            except Exception as e:
+                self.receiver.s.close()
+                print("El servidor esta offline, intentando reconectar", traceback.format_exc())
+            except OSError:
                 self.stop()
-                print("Unknown error: ",e)
-                raise
+                self.receiver.s.close()
+                print("El dispositivo no esta conectado a internet", traceback.format_exc())
+            except ValueError:
+                self.stop()
+                self.receiver.s.close()
+                print("Los datos recibidos no fueron los que se esperaban", traceback.format_exc())
+            except Exception:
+                self.stop()
+                self.receiver.s.close()
+                print("Unknown error: ", traceback.format_exc())
 
                 
 
 if __name__ == "__main__":
     summit = RC_car(5009,13,18)
+    summit.initialization()
+    summit.stop()
     summit.start()
