@@ -109,15 +109,18 @@ class tcp_request(communicator):
     def create_socket(self):  
    
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.settimeout(0.5)
         self.s.connect((self.IP, self.PORT))
 
-            
+    def close_connection(self):
+        self.s.close()
+        
     def request(self):
 
         time.sleep(0.01)
         message = str(self.data).encode("utf-8")
-        self.data = self.decode_data(self.s.recv(self.BUFFER))
         self.s.sendall(message)
+        self.data = self.decode_data(self.s.recv(self.BUFFER))
         print("receiving:" , self.data)
         return self.data
 
