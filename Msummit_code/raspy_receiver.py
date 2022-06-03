@@ -19,23 +19,10 @@ class RC_car():
         GPIO.setmode(GPIO.BOARD) #Use Board numerotation mode
         GPIO.setwarnings(False) #Disable warnings
         self.pi = pigpio.pi() # Connect to local Pi.
-        while True:
-                    
-            try:
-                self.receiver = comm_module.tcp_request("192.168.8.103",self.PORT,1024)
-                break
-            except ConnectionResetError:
-                print("El mando ha sido desconectado", traceback.format_exc())
-                continue
-            except ConnectionRefusedError:
-                print("El servidor esta offline, intentando reconectar", traceback.format_exc())
-                continue
-            except OSError:
-                print("El dispositivo no esta conectado a internet", traceback.format_exc())
-                continue
-            except Exception:
-                print("Unknown error: ", traceback.format_exc())
-                raise
+        
+        
+    def create_receiver(self):
+        self.receiver = comm_module.tcp_request("192.168.8.103",self.PORT,1024)
 
 
     def get_pwm(self,angle):
@@ -91,13 +78,28 @@ class RC_car():
         self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
 
 
-                
+    def try_connection(self):
+        while True:
+            try:
+                summit.create_receiver()
+                break
+            except ConnectionRefusedError:
+                print("El host rechazo la conexion, reintentado...")
+                continue            
+            except socket.timeout:
+                print("El dispositivo no se pudo conectar, reintentado...")
+                continue
+            except OSError:
+                print("El dispositivo no se pudo conectar, reintentado...")
+                continue  
 
 if __name__ == "__main__":
+    
     PORT=5009
     SERVO_PIN=13
     ESC_PIN=18
     summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
+    summit.try_connection()
     summit.initialization()
     summit.stop()
     while True:
@@ -105,31 +107,21 @@ if __name__ == "__main__":
             summit.move()
         except ConnectionResetError:
             summit.stop()
-            summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
-            summit.initialization()
-            summit.stop()
+            summit.try_connection()
             print("El mando ha sido desconectado", traceback.format_exc())
         except ConnectionRefusedError:
             summit.stop()
-            summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
-            summit.initialization()
-            summit.stop()
+            summit.try_connection()
             print("El servidor esta offline, intentando reconectar", traceback.format_exc())
         except OSError:
             summit.stop()
-            summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
-            summit.initialization()
-            summit.stop()
+            summit.try_connection()
             print("El dispositivo no esta conectado a internet", traceback.format_exc())
         except ValueError:
             summit.stop()
-            summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
-            summit.initialization()
-            summit.stop()
+            summit.try_connection()
             print("Los datos recibidos no fueron los que se esperaban", traceback.format_exc())
         except Exception:
             summit.stop()
-            summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
-            summit.initialization()
-            summit.stop()
+            summit.try_connection()
             print("Unknown error: ", traceback.format_exc())
