@@ -16,5 +16,6 @@ while True:
         PS4.move_car()
         #PS4.mapping_tool()
     except OSError:
+        print("El dispositivo con IP ",PS4.control_sender.addr[0], "y puerto ",PS4.control_sender.addr[1], "se desconecto")
         PS4 = wheel_module.PS4Controller(usb_port,deadman_port,speedup_port,speeddown_port,throttle_port,brake_port,wheel_port)
         continue

@@ -55,6 +55,7 @@ class server(communicator):
         s.bind((self.IP, self.PORT))
         s.listen(1)
         conn, self.addr = s.accept()
+        conn.settimeout(2)
         print("Se conecto un nuevo dispositivo con ip ",self.addr[0], " por el puerto ",self.addr[1])
         return conn
     
