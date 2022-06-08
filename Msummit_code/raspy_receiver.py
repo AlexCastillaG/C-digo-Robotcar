@@ -74,7 +74,6 @@ class RC_car():
 
     def move(self):
    
-        #self.logger.info(data)
         data = self.receiver.request()
         self.log_info(data)
         self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
