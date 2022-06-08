@@ -13,9 +13,15 @@ class RC_car():
         self.PORT = PORT
         self.servo_pin = servo_pin
         self.esc_pin = esc_pin
-        logging.basicConfig(filename='msummit.log', level=logging.DEBUG, 
-                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
-        self.logger=logging.getLogger(__name__)            
+
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(message)s',
+                            datefmt='%a, %d %b %Y %H:%M:%S',
+                            filename= 'msummit.txt',
+                            filemode='a')
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        logging.getLogger().addHandler(console)
         GPIO.setmode(GPIO.BOARD) #Use Board numerotation mode
         GPIO.setwarnings(False) #Disable warnings
         self.pi = pigpio.pi() # Connect to local Pi.
@@ -28,15 +34,11 @@ class RC_car():
     def get_pwm(self,angle):
         return (angle/90) + 1500
 
-    def log_err(self,error):
-        self.logger.error(err)
-        print(error)
+    def log_info(self,info):
+        logging.info(info)
+        
     def close_connection(self):
         self.receiver.close_connection()
-        
-    def log_info(self,info):
-        self.logger.info(info)
-        print(info)
         
     def angle_to_percent(self,angle):
         if angle > 180 or angle < 0:
@@ -54,7 +56,7 @@ class RC_car():
         data=[90,1500]
         self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[0])))
         self.pi.set_servo_pulsewidth(self.esc_pin,float(data[1]))     
-        print("Se activo la parada de emergencia")
+        self.log_info("Se activo la parada de emergencia")
         
     def initialization(self):
   
@@ -74,23 +76,27 @@ class RC_car():
    
         #self.logger.info(data)
         data = self.receiver.request()
+        self.log_info(data)
         self.pi.set_servo_pulsewidth(self.servo_pin , self.angle_to_percent(float(data[1])))
         self.pi.set_servo_pulsewidth(self.esc_pin,float(data[0]))
-
+        
+    def run_exception_protocol(self, info):
+        self.stop()
+        self.try_connection()
+        self.log_info(info)
 
     def try_connection(self):
         while True:
             try:
                 summit.create_receiver()
                 break
-            except ConnectionRefusedError:
-                print("El host rechazo la conexion, reintentado...")
+                self.log_info("El host rechazo la conexion, reintentado...")
                 continue            
             except socket.timeout:
-                print("El dispositivo no se pudo conectar, reintentado...")
+                self.log_info("El dispositivo no se pudo conectar, reintentado...")
                 continue
             except OSError:
-                print("El dispositivo no se pudo conectar, reintentado...")
+                self.log_info("El dispositivo no se pudo conectar, reintentado...")
                 continue  
 
 if __name__ == "__main__":
@@ -99,29 +105,24 @@ if __name__ == "__main__":
     SERVO_PIN=13
     ESC_PIN=18
     summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
-    summit.try_connection()
     summit.initialization()
+    summit.try_connection()
     summit.stop()
     while True:
         try:
             summit.move()
         except ConnectionResetError:
-            summit.stop()
-            summit.try_connection()
-            print("El mando ha sido desconectado", traceback.format_exc())
+            summit.run_exception_protocol(("El mando ha sido desconectado", traceback.format_exc()))
+            
         except ConnectionRefusedError:
-            summit.stop()
-            summit.try_connection()
-            print("El servidor esta offline, intentando reconectar", traceback.format_exc())
+            summit.run_exception_protocol(("El servidor esta offline, intentando reconectar", traceback.format_exc()))
+            
         except OSError:
-            summit.stop()
-            summit.try_connection()
-            print("El dispositivo no esta conectado a internet", traceback.format_exc())
+            summit.run_exception_protocol(("El dispositivo no esta conectado a internet", traceback.format_exc()))
+
         except ValueError:
-            summit.stop()
-            summit.try_connection()
-            print("Los datos recibidos no fueron los que se esperaban", traceback.format_exc())
+            summit.run_exception_protocol(("Los datos recibidos no fueron los que se esperaban", traceback.format_exc()))
+            
         except Exception:
-            summit.stop()
-            summit.try_connection()
-            print("Unknown error: ", traceback.format_exc())
+            summit.run_exception_protocol(("Unknown error: ", traceback.format_exc()))
+

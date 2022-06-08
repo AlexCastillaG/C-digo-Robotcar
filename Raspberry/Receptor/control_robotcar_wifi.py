@@ -42,10 +42,5 @@ initialization()
 
 while True:
     time.sleep(0.01)
-    data, addr = sock.recvfrom(1024)
-    message= json.loads(data.decode())
-    print("speed: %s"% message.get("speed")+" angle: %s"% message.get("angle"))
-    pi.set_servo_pulsewidth(Servo , (message.get("angle")))
-    pi.set_servo_pulsewidth(ESC,message.get("speed"))
 
 
