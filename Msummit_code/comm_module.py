@@ -12,7 +12,7 @@ class communicator():
     def get_ip_and_port(self,filename):
         with open(str(filename), "r") as a:
             dict = a.read().split(":")
-        return dict[0],int(dict[1]),int(dict[2]),bool(int(dict[3]))
+        return dict[0],int(dict[1])
 
     def decode_data(self,data):
         data = data.decode("utf-8").strip('][').split(', ')
@@ -56,7 +56,8 @@ class server(communicator):
         
 class tcp_request(communicator):
     
-    def __init__(self,IP,PORT,BUFFER):
+    def __init__(self,BUFFER):
+        IP,PORT = self.get_ip_and_port("CONF.txt")
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
         self.data="hello"
         self.create_socket()

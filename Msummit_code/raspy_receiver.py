@@ -9,11 +9,10 @@ import traceback
 
 
 class RC_car():
-    def __init__(self,PORT,servo_pin,esc_pin):
-        self.PORT = PORT
+    def __init__(self,servo_pin,esc_pin):
         self.servo_pin = servo_pin
         self.esc_pin = esc_pin
-
+        
         logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',
@@ -22,13 +21,14 @@ class RC_car():
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         logging.getLogger().addHandler(console)
+        
         GPIO.setmode(GPIO.BOARD) #Use Board numerotation mode
         GPIO.setwarnings(False) #Disable warnings
         self.pi = pigpio.pi() # Connect to local Pi.
         
         
     def create_receiver(self):
-        self.receiver = comm_module.tcp_request("192.168.8.103",self.PORT,1024)
+        self.receiver = comm_module.tcp_request(1024)
 
 
     def get_pwm(self,angle):
@@ -101,13 +101,14 @@ class RC_car():
 
 if __name__ == "__main__":
     
-    PORT=5009
+
     SERVO_PIN=13
     ESC_PIN=18
-    summit = RC_car(PORT,SERVO_PIN,ESC_PIN)
+    summit = RC_car(SERVO_PIN,ESC_PIN)
     summit.initialization()
     summit.try_connection()
     summit.stop()
+    
     while True:
         try:
             summit.move()
