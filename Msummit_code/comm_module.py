@@ -56,8 +56,8 @@ class server(communicator):
         
 class tcp_request(communicator):
     
-    def __init__(self,BUFFER):
-        IP,PORT = self.get_ip_and_port("CONF.txt")
+    def __init__(self,BUFFER,conf_file):
+        IP,PORT = self.get_ip_and_port(conf_file)
         self.IP,self.PORT,self.BUFFER = IP,PORT,BUFFER
         self.data="hello"
         self.create_socket()

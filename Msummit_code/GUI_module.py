@@ -21,14 +21,14 @@ class car_Interface(Interface):
 
 
 
-    def __init__(self,net_data):        
+    def __init__(self):        
         self.speed = 0.0
         self.max_speed = 5
         self.angle = 0.0
         self.error_code = "System OK"
         self.deadman = False
         self.state = "Stop"
-        self.data_receiver = comm_module.receiver(net_data)
+        self.data_receiver = comm_module.tcp_request(1024,"CONF_GUI.txt")
         self.speed_images = ["images\\velocidad_PARADO.png","images\\velocidad_1.png","images\\velocidad_2.png","images\\velocidad_3.png",
                                     "images\\velocidad_4.png","images\\velocidad_5.png","images\\velocidad_6.png","images\\velocidad_MAX.png"]
         self.speed_img = self.speed_images[0]
@@ -57,7 +57,9 @@ class car_Interface(Interface):
         
         
     def get_data(self):
-        speed,angle,deadman,max_speed = self.data_receiver.receive()
+        speed,angle  = self.data_receiver.request()
+        deadman = True
+        max_speed = 2000
         self.speed = round(float(speed),1)
         self.angle = round(float(angle),1)
         self.deadman = deadman
@@ -122,7 +124,8 @@ class car_Interface(Interface):
     def start_GUI(self):
         while True:
             event, values = self.window.read(timeout=500)
-            self.get_data()   
+            print(self.get_data())  
+            """         
             self.speed_adjusting()
             self.get_speed_img()
             self.get_deadman_img()
@@ -133,6 +136,7 @@ class car_Interface(Interface):
 
             self.window['wheel_img'].Update("images\\volante.png")
             self.window.Refresh()
+            """
 
             #print(self.speed,self.angle,self.deadman,self.max_speed)
             if event == sg.WIN_CLOSED:

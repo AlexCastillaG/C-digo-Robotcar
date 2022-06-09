@@ -28,7 +28,7 @@ class RC_car():
         
         
     def create_receiver(self):
-        self.receiver = comm_module.tcp_request(1024)
+        self.receiver = comm_module.tcp_request(1024,"CONF.txt")
 
 
     def get_pwm(self,angle):
